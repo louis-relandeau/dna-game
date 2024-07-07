@@ -29,43 +29,38 @@ public class script : MonoBehaviour
         }
 
         if (nucleotides.Count > 0) {
+            // Get the oldest i.e. botom most nucleotide
             GameObject oldestNucleotide = nucleotides[0];
+
+            // Check its text vs user ipt, if they match delete it
             TextMeshPro textComponent = oldestNucleotide.GetComponentInChildren<TextMeshPro>();
             if (textComponent != null) {
                 if (Input.GetKeyDown(textComponent.text.ToLower())) {
                     nucleotides.RemoveAt(0);
                     Destroy(oldestNucleotide);
                     counter += 1;
+                    return;
                 }
             }
 
-            while (true) {
-                if (nucleotides.Count > 0) {
-                    GameObject currentNucleotide = nucleotides[0];
-                    if (currentNucleotide.transform.position.y < -6) {
-                        nucleotides.RemoveAt(0);
-                        Destroy(currentNucleotide);
-                        Debug.Log("Game over. Final score: " + counter); // Debug log
-                        if (gameOver != null) {
-                            gameOver.Setup(counter);
-                        } else {
-                            Debug.Log("Setup is nullptr");
-                        }
-                        spawn = false;
-                    } else {
-                        break;
-                    }
+            // If its y position, if outside the screen, game over
+            if (oldestNucleotide.transform.position.y < -6) {
+                nucleotides.RemoveAt(0);
+                Destroy(oldestNucleotide);
+                Debug.Log("Game over. Final score: " + counter); // Debug log
+                if (gameOver != null) {
+                    gameOver.Setup(counter);
+                } else {
+                    Debug.Log("Setup is nullptr");
                 }
+                spawn = false;
             }
         }
     }
 
     void spawnNucleotide()
     {
-        float minX = transform.position.x - offset;
-        float maxX = transform.position.x + offset;
-
-        GameObject instance = Instantiate(nucleotide, new Vector3(Random.Range(minX, maxX), transform.position.y, 0), transform.rotation);
+        GameObject instance = Instantiate(nucleotide, new Vector3(transform.position.y, transform.position.y, 0), transform.rotation);
         nucleotides.Add(instance);
 
         TextMeshPro textComponent = instance.GetComponentInChildren<TextMeshPro>();
