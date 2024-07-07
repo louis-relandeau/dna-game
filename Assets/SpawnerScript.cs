@@ -8,8 +8,10 @@ public class script : MonoBehaviour
     public GameObject nucleotide;
     public GameOverScript gameOver;
     public float offset = 2.5f;
-    public float spawnPeriod = 1;
-    private float timer = 0;
+    public float baseSpawnPeriod = 1f;
+    private float spawnPeriod;
+    private float currRelativeTime = 1f;
+    private float timer = 0f;
     private char[] allowedChars = { 'A', 'C', 'G', 'T' };
     public int counter = 0;
     bool spawn = true;
@@ -17,7 +19,9 @@ public class script : MonoBehaviour
     private List<GameObject> nucleotides = new List<GameObject>();
 
     // Start is called before the first frame update
-    void Start() {}
+    void Start() {
+        spawnPeriod = baseSpawnPeriod;
+    }
 
     // Update is called once per frame
     void Update() {
@@ -34,12 +38,23 @@ public class script : MonoBehaviour
 
             // Check its text vs user ipt, if they match delete it
             TextMeshPro textComponent = oldestNucleotide.GetComponentInChildren<TextMeshPro>();
+            char expectedKey = textComponent.text.ToLower()[0];
             if (textComponent != null) {
-                if (Input.GetKeyDown(textComponent.text.ToLower())) {
+                if (Input.GetKeyDown(expectedKey.ToString())) {
                     nucleotides.RemoveAt(0);
                     Destroy(oldestNucleotide);
                     counter += 1;
+                    updateNucleotideRelativetime(currRelativeTime += 0.02f);
                     return;
+                }
+                // Punish for bad key 
+                else {
+                    foreach (char key in allowedChars) {
+                        if (key != expectedKey && Input.GetKeyDown(key.ToString().ToLower())) {
+                            updateNucleotideRelativetime(currRelativeTime += 0.2f);
+                            break;
+                        }
+                    }
                 }
             }
 
@@ -61,6 +76,7 @@ public class script : MonoBehaviour
     void spawnNucleotide()
     {
         GameObject instance = Instantiate(nucleotide, new Vector3(transform.position.y, transform.position.y, 0), transform.rotation);
+        updateNucleotideRelativetime(instance);
         nucleotides.Add(instance);
 
         TextMeshPro textComponent = instance.GetComponentInChildren<TextMeshPro>();
@@ -68,6 +84,21 @@ public class script : MonoBehaviour
         {
             char randomLetter = allowedChars[Random.Range(0, allowedChars.Length)];
             textComponent.text = randomLetter.ToString();
+        }
+    }
+
+    void updateNucleotideRelativetime(GameObject nucleotide) {
+        NucleotideMoveScript moveScript = nucleotide.GetComponent<NucleotideMoveScript>();
+        if (moveScript != null) {
+            moveScript.relativeTime = currRelativeTime;
+        }
+    }
+
+    void updateNucleotideRelativetime(float newTime) {
+        currRelativeTime = newTime;
+        spawnPeriod = baseSpawnPeriod / currRelativeTime;
+        foreach (GameObject nucleotide in nucleotides) {
+            updateNucleotideRelativetime(nucleotide);
         }
     }
 }

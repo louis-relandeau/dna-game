@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class NucleotideMoveScript : MonoBehaviour
 {
-    public float moveSpeed = 1f;
+    public float relativeTime = 1f;
     public float frequency = 1.2f;
     public float amplitude = 1.3f;
     public float phaseShift = 2f; // Appears as x offset
@@ -14,8 +14,8 @@ public class NucleotideMoveScript : MonoBehaviour
     void Update()
     {
         elapsedTime += Time.deltaTime;
-        float x = Mathf.Sin(elapsedTime * frequency + phaseShift) * amplitude;
-        float y = transform.position.y - (moveSpeed * Time.deltaTime);
+        float x = Mathf.Sin(elapsedTime * relativeTime * frequency + phaseShift) * amplitude;
+        float y = transform.position.y - Time.deltaTime * relativeTime;
         transform.position = new Vector3(x, y, transform.position.z);
     }
 }
