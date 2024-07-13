@@ -13,8 +13,8 @@ public class NucleotideMoveScript : MonoBehaviour
 
     void Update()
     {
-        elapsedTime += Time.deltaTime;
-        float x = Mathf.Sin(elapsedTime * relativeTime * frequency + phaseShift) * amplitude;
+        elapsedTime += Time.deltaTime * relativeTime;
+        float x = Mathf.Sin(elapsedTime * frequency + phaseShift) * amplitude;
         float y = transform.position.y - Time.deltaTime * relativeTime;
         transform.position = new Vector3(x, y, transform.position.z);
     }
