@@ -2,11 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.SceneManagement;
 
-public class script : MonoBehaviour
+public class SpawnerScript : MonoBehaviour
 {
     public GameObject nucleotide;
-    public GameOverScript gameOver;
     public float offset = 2.5f;
     public float baseSpawnPeriod = 1f;
     private float spawnPeriod;
@@ -28,7 +28,7 @@ public class script : MonoBehaviour
         if (timer < spawnPeriod) {
             timer += Time.deltaTime;
         } else if (spawn) {
-            spawnNucleotide();
+            SpawnNucleotide();
             timer = 0;
         }
 
@@ -44,14 +44,14 @@ public class script : MonoBehaviour
                     nucleotides.RemoveAt(0);
                     Destroy(oldestNucleotide);
                     counter += 1;
-                    updateNucleotideRelativetime(currRelativeTime += 0.02f);
+                    UpdateNucleotideRelativetime(currRelativeTime += 0.02f);
                     return;
                 }
                 // Punish for bad key 
                 else {
                     foreach (char key in allowedChars) {
                         if (key != expectedKey && Input.GetKeyDown(key.ToString().ToLower())) {
-                            updateNucleotideRelativetime(currRelativeTime += 0.2f);
+                            UpdateNucleotideRelativetime(currRelativeTime += 0.2f);
                             break;
                         }
                     }
@@ -62,21 +62,18 @@ public class script : MonoBehaviour
             if (oldestNucleotide.transform.position.y < -6) {
                 nucleotides.RemoveAt(0);
                 Destroy(oldestNucleotide);
-                Debug.Log("Game over. Final score: " + counter); // Debug log
-                if (gameOver != null) {
-                    gameOver.Setup(counter);
-                } else {
-                    Debug.Log("Setup is nullptr");
-                }
+                Debug.Log("Game over. Final score: " + counter);
+                ScoreManager.SetScore(counter);
+                SceneManager.LoadSceneAsync("MainMenu");
                 spawn = false;
             }
         }
     }
 
-    void spawnNucleotide()
+    void SpawnNucleotide()
     {
         GameObject instance = Instantiate(nucleotide, new Vector3(transform.position.y, transform.position.y, 0), transform.rotation);
-        updateNucleotideRelativetime(instance);
+        UpdateNucleotideRelativetime(instance);
         nucleotides.Add(instance);
 
         TextMeshPro textComponent = instance.GetComponentInChildren<TextMeshPro>();
@@ -87,18 +84,18 @@ public class script : MonoBehaviour
         }
     }
 
-    void updateNucleotideRelativetime(GameObject nucleotide) {
+    void UpdateNucleotideRelativetime(GameObject nucleotide) {
         NucleotideMoveScript moveScript = nucleotide.GetComponent<NucleotideMoveScript>();
         if (moveScript != null) {
             moveScript.relativeTime = currRelativeTime;
         }
     }
 
-    void updateNucleotideRelativetime(float newTime) {
+    void UpdateNucleotideRelativetime(float newTime) {
         currRelativeTime = newTime;
         spawnPeriod = baseSpawnPeriod / currRelativeTime;
         foreach (GameObject nucleotide in nucleotides) {
-            updateNucleotideRelativetime(nucleotide);
+            UpdateNucleotideRelativetime(nucleotide);
         }
     }
 }
