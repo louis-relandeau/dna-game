@@ -7,6 +7,8 @@ using UnityEngine.SceneManagement;
 public class SpawnerScript : MonoBehaviour
 {
     public GameObject nucleotide;
+    public GameObject nucleotideDestroyParticles;
+
     public float offset = 2.5f;
     public float baseSpawnPeriod = 1f;
     private float spawnPeriod;
@@ -41,9 +43,7 @@ public class SpawnerScript : MonoBehaviour
             char expectedKey = textComponent.text.ToLower()[0];
             if (textComponent != null) {
                 if (Input.GetKeyDown(expectedKey.ToString())) {
-                    nucleotides.RemoveAt(0);
-                    Destroy(oldestNucleotide);
-                    counter += 1;
+                    KillNucleotide(oldestNucleotide);
                     UpdateNucleotideRelativetime(currRelativeTime += 0.02f);
                     return;
                 }
@@ -97,5 +97,15 @@ public class SpawnerScript : MonoBehaviour
         foreach (GameObject nucleotide in nucleotides) {
             UpdateNucleotideRelativetime(nucleotide);
         }
+    }
+
+    void KillNucleotide(GameObject nucleotide) {
+        GameObject particleEffect = Instantiate(nucleotideDestroyParticles,
+                                                nucleotide.transform.position,
+                                                nucleotide.transform.rotation);
+
+        nucleotides.RemoveAt(0);
+        Destroy(nucleotide);
+        counter += 1;
     }
 }
