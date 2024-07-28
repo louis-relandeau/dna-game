@@ -23,6 +23,8 @@ public class SpawnerScript : MonoBehaviour
     // Start is called before the first frame update
     void Start() {
         spawnPeriod = baseSpawnPeriod;
+        MusicManager.Instance.SetMusicVolume(0.25f);
+        MusicManager.Instance.PlayMusic(1);
     }
 
     // Update is called once per frame
@@ -51,6 +53,7 @@ public class SpawnerScript : MonoBehaviour
                 else {
                     foreach (char key in allowedChars) {
                         if (key != expectedKey && Input.GetKeyDown(key.ToString().ToLower())) {
+                            MusicManager.Instance.PlaySFX(1, 0.2f);
                             UpdateNucleotideRelativetime(currRelativeTime += 0.2f);
                             break;
                         }
@@ -62,10 +65,12 @@ public class SpawnerScript : MonoBehaviour
             if (oldestNucleotide.transform.position.y < -6) {
                 nucleotides.RemoveAt(0);
                 Destroy(oldestNucleotide);
+                spawn = false;
+                MusicManager.Instance.PlaySFX(1, 0.2f);
                 Debug.Log("Game over. Final score: " + counter);
                 ScoreManager.SetScore(counter);
                 SceneManager.LoadSceneAsync("MainMenu");
-                spawn = false;
+                
             }
         }
     }
@@ -92,11 +97,15 @@ public class SpawnerScript : MonoBehaviour
     }
 
     void UpdateNucleotideRelativetime(float newTime) {
+        // Increase speed of objects
         currRelativeTime = newTime;
         spawnPeriod = baseSpawnPeriod / currRelativeTime;
         foreach (GameObject nucleotide in nucleotides) {
             UpdateNucleotideRelativetime(nucleotide);
         }
+
+        // Also increase music speed. Not nice to change pitch
+        // MusicManager.Instance.SetMusicSpeed(currRelativeTime);
     }
 
     void KillNucleotide(GameObject nucleotide) {
@@ -106,6 +115,7 @@ public class SpawnerScript : MonoBehaviour
 
         nucleotides.RemoveAt(0);
         Destroy(nucleotide);
+        MusicManager.Instance.PlaySFX(0, 0.2f);
         counter += 1;
     }
 }

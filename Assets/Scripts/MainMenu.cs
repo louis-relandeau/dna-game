@@ -20,6 +20,9 @@ public class MainMenuScript : MonoBehaviour
     };
 
     void Start() {
+        MusicManager.Instance.SetMusicSpeed(1); // Reset
+        MusicManager.Instance.SetMusicVolume(0.25f);
+        MusicManager.Instance.PlayMusic(0);
         if (ScoreManager.Score.HasValue && ScoreManager.BestScore.HasValue) {
             int latestScore = ScoreManager.Score.Value;
             scoreText.text = "Previous score: " + latestScore.ToString()
@@ -44,10 +47,12 @@ public class MainMenuScript : MonoBehaviour
     }
 
     public void PlayGame() {
+        MusicManager.Instance.PlaySFX(2);
         SceneManager.LoadSceneAsync("MainLoop");
     }
 
     public void QuitGame() {
+        MusicManager.Instance.PlaySFX(2);
         Application.Quit();
     }
 }
