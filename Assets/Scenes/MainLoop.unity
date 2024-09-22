@@ -153,8 +153,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nucleotide: {fileID: 137573033043725711, guid: f688b5b37ab80c441a3ee028c19a0483, type: 3}
   nucleotideDestroyParticles: {fileID: 4214956422477095994, guid: 58bb47980e67d3c49a5ecffa57651d6f, type: 3}
-  offset: 2.5
-  baseSpawnPeriod: 1
+  dnaStrand: {fileID: 4259943285170632484, guid: a64a4a1b19c716e41b840b31cd11cb18, type: 3}
   counter: 0
 --- !u!4 &253288991
 Transform:
@@ -340,7 +339,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
@@ -422,7 +421,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 8035d2207e0c0d640bf70b10ee3faceb, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 92b241c8fe48cdb48894b1502f0a67d0, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

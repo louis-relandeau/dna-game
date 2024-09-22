@@ -8,17 +8,19 @@ public class SpawnerScript : MonoBehaviour
 {
     public GameObject nucleotide;
     public GameObject nucleotideDestroyParticles;
+    public GameObject dnaStrand;
 
-    public float offset = 2.5f;
-    public float baseSpawnPeriod = 1f;
+    [System.NonSerialized]
+    private float baseSpawnPeriod = 1f,
+                  currRelativeTime = 1f;
     private float spawnPeriod;
-    private float currRelativeTime = 1f;
     private float timer = 0f;
     private char[] allowedChars = { 'A', 'C', 'G', 'T' };
     public int counter = 0;
     bool spawn = true;
 
     private List<GameObject> nucleotides = new List<GameObject>();
+    private List<GameObject> dnaStrands = new List<GameObject>();
 
     // Start is called before the first frame update
     void Start() {
@@ -33,6 +35,9 @@ public class SpawnerScript : MonoBehaviour
             timer += Time.deltaTime;
         } else if (spawn) {
             SpawnNucleotide();
+            if (dnaStrands.Count == 0) {
+                SpawnDnaStrand();
+            }
             timer = 0;
         }
 
@@ -46,7 +51,7 @@ public class SpawnerScript : MonoBehaviour
             if (textComponent != null) {
                 if (Input.GetKeyDown(expectedKey.ToString())) {
                     KillNucleotide(oldestNucleotide);
-                    UpdateNucleotideRelativetime(currRelativeTime += 0.02f);
+                    UpdateRelativeTime(currRelativeTime += 0.02f);
                     return;
                 }
                 // Punish for bad key 
@@ -54,7 +59,7 @@ public class SpawnerScript : MonoBehaviour
                     foreach (char key in allowedChars) {
                         if (key != expectedKey && Input.GetKeyDown(key.ToString().ToLower())) {
                             MusicManager.Instance.PlaySFX(1, 0.2f);
-                            UpdateNucleotideRelativetime(currRelativeTime += 0.2f);
+                            UpdateRelativeTime(currRelativeTime += 0.2f);
                             break;
                         }
                     }
@@ -73,12 +78,23 @@ public class SpawnerScript : MonoBehaviour
                 
             }
         }
+
+        // For the first dna strand, spawn another one when it reaches y = 0
+        if (dnaStrands.Count == 1 && dnaStrands[0].transform.position.y < 0) {
+            SpawnDnaStrand();
+        }
+        // If the oldest dna strand is outside the screen, remove it and spawn another one
+        else if (dnaStrands.Count > 0 && dnaStrands[0].transform.position.y < -11) {
+            Destroy(dnaStrands[0]);
+            dnaStrands.RemoveAt(0);
+            SpawnDnaStrand();
+        }
     }
 
-    void SpawnNucleotide()
-    {
+    void SpawnNucleotide() {
         GameObject instance = Instantiate(nucleotide, new Vector3(transform.position.y, transform.position.y, 0), transform.rotation);
-        UpdateNucleotideRelativetime(instance);
+        nucleotide.GetComponent<NucleotideMoveScript>().SetStartPos(Time.time);
+        UpdateGameObjectRelativeTime<NucleotideMoveScript>(instance);
         nucleotides.Add(instance);
 
         TextMeshPro textComponent = instance.GetComponentInChildren<TextMeshPro>();
@@ -89,19 +105,19 @@ public class SpawnerScript : MonoBehaviour
         }
     }
 
-    void UpdateNucleotideRelativetime(GameObject nucleotide) {
-        NucleotideMoveScript moveScript = nucleotide.GetComponent<NucleotideMoveScript>();
+    void UpdateGameObjectRelativeTime<T>(GameObject gameObject) where T : class, IRelativeTime {
+        T moveScript = nucleotide.GetComponent<T>();
         if (moveScript != null) {
             moveScript.relativeTime = currRelativeTime;
         }
     }
 
-    void UpdateNucleotideRelativetime(float newTime) {
+    void UpdateRelativeTime(float newTime) {
         // Increase speed of objects
         currRelativeTime = newTime;
         spawnPeriod = baseSpawnPeriod / currRelativeTime;
         foreach (GameObject nucleotide in nucleotides) {
-            UpdateNucleotideRelativetime(nucleotide);
+            UpdateGameObjectRelativeTime<NucleotideMoveScript>(nucleotide);
         }
 
         // Also increase music speed. Not nice to change pitch
@@ -117,5 +133,11 @@ public class SpawnerScript : MonoBehaviour
         Destroy(nucleotide);
         MusicManager.Instance.PlaySFX(0, 0.2f);
         counter += 1;
+    }
+
+    void SpawnDnaStrand() {
+        GameObject instance = Instantiate(dnaStrand, new Vector3(0, 11, 0), transform.rotation);
+        UpdateGameObjectRelativeTime<MotionDNA>(instance);
+        dnaStrands.Add(instance);
     }
 }

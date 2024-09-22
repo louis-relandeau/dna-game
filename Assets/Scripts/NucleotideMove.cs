@@ -2,20 +2,24 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NucleotideMoveScript : MonoBehaviour
+public class NucleotideMoveScript : MonoBehaviour, IRelativeTime
 {
-    public float relativeTime = 1f;
-    public float frequency = 1.2f;
-    public float amplitude = 1.3f;
-    public float phaseShift = 2f; // Appears as x offset
+    [System.NonSerialized]
+    public float frequency = 1.05f,
+                 amplitude = 1.35f,
+                 phaseShift = 2f; // Appears as x offset
 
-    private float elapsedTime = 0f;
+    public float relativeTime { get; set; } = 1f;
+
+    public float xPos;
+
+    public void SetStartPos(float currTime) {
+        xPos = Mathf.Sin(currTime * frequency + phaseShift) * amplitude;
+    }
 
     void Update()
     {
-        elapsedTime += Time.deltaTime * relativeTime;
-        float x = Mathf.Sin(elapsedTime * frequency + phaseShift) * amplitude;
         float y = transform.position.y - Time.deltaTime * relativeTime;
-        transform.position = new Vector3(x, y, transform.position.z);
+        transform.position = new Vector3(xPos, y, transform.position.z);
     }
 }
