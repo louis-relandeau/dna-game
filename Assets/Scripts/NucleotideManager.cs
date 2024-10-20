@@ -21,24 +21,35 @@ public class SpawnerScript : MonoBehaviour
 
     private List<GameObject> nucleotides = new List<GameObject>();
     private List<GameObject> dnaStrands = new List<GameObject>();
+    
+    private float relativeCreationTime = 0f;
 
     // Start is called before the first frame update
     void Start() {
         spawnPeriod = baseSpawnPeriod;
         MusicManager.Instance.SetMusicVolume(0.25f);
         MusicManager.Instance.PlayMusic(1);
+
+        // Immediately spawn 2 dna strands (one in the middle of the screen and one at the top)
+        SpawnDnaStrand(0);
+        SpawnDnaStrand(10);
     }
 
     // Update is called once per frame
     void Update() {
+        relativeCreationTime += Time.deltaTime * currRelativeTime;
         if (timer < spawnPeriod) {
             timer += Time.deltaTime;
         } else if (spawn) {
             SpawnNucleotide();
-            if (dnaStrands.Count == 0) {
-                SpawnDnaStrand();
-            }
             timer = 0;
+        }
+
+        // If the oldest dna strand is outside the screen, remove it and spawn another one
+        if (dnaStrands.Count > 0 && dnaStrands[0].transform.position.y < -10) {
+            Destroy(dnaStrands[0]);
+            dnaStrands.RemoveAt(0);
+            SpawnDnaStrand();
         }
 
         if (nucleotides.Count > 0) {
@@ -75,25 +86,14 @@ public class SpawnerScript : MonoBehaviour
                 Debug.Log("Game over. Final score: " + counter);
                 ScoreManager.SetScore(counter);
                 SceneManager.LoadSceneAsync("MainMenu");
-                
             }
-        }
-
-        // For the first dna strand, spawn another one when it reaches y = 0
-        if (dnaStrands.Count == 1 && dnaStrands[0].transform.position.y < 0) {
-            SpawnDnaStrand();
-        }
-        // If the oldest dna strand is outside the screen, remove it and spawn another one
-        else if (dnaStrands.Count > 0 && dnaStrands[0].transform.position.y < -11) {
-            Destroy(dnaStrands[0]);
-            dnaStrands.RemoveAt(0);
-            SpawnDnaStrand();
         }
     }
 
     void SpawnNucleotide() {
-        GameObject instance = Instantiate(nucleotide, new Vector3(transform.position.y, transform.position.y, 0), transform.rotation);
-        nucleotide.GetComponent<NucleotideMoveScript>().SetStartPos(Time.time);
+        // Spawn it above scree so that it can move down
+        GameObject instance = Instantiate(nucleotide, new Vector3(transform.position.y, transform.position.y + 1, 0), transform.rotation);
+        instance.GetComponent<NucleotideMoveScript>().SetStartPosX(relativeCreationTime);
         UpdateGameObjectRelativeTime<NucleotideMoveScript>(instance);
         nucleotides.Add(instance);
 
@@ -106,9 +106,10 @@ public class SpawnerScript : MonoBehaviour
     }
 
     void UpdateGameObjectRelativeTime<T>(GameObject gameObject) where T : class, IRelativeTime {
-        T moveScript = nucleotide.GetComponent<T>();
+        T moveScript = gameObject.GetComponent<T>();
         if (moveScript != null) {
             moveScript.relativeTime = currRelativeTime;
+            Debug.Log("updated relative time smth");
         }
     }
 
@@ -119,6 +120,10 @@ public class SpawnerScript : MonoBehaviour
         foreach (GameObject nucleotide in nucleotides) {
             UpdateGameObjectRelativeTime<NucleotideMoveScript>(nucleotide);
         }
+        foreach (GameObject dnaStrand in dnaStrands) {
+            UpdateGameObjectRelativeTime<MotionDNA>(dnaStrand);
+        }
+        Debug.Log("Relative time: " + currRelativeTime);
 
         // Also increase music speed. Not nice to change pitch
         // MusicManager.Instance.SetMusicSpeed(currRelativeTime);
@@ -135,8 +140,8 @@ public class SpawnerScript : MonoBehaviour
         counter += 1;
     }
 
-    void SpawnDnaStrand() {
-        GameObject instance = Instantiate(dnaStrand, new Vector3(0, 11, 0), transform.rotation);
+    void SpawnDnaStrand(float optionalStartY = 10) {
+        GameObject instance = Instantiate(dnaStrand, new Vector3(0, optionalStartY, 0), transform.rotation);
         UpdateGameObjectRelativeTime<MotionDNA>(instance);
         dnaStrands.Add(instance);
     }

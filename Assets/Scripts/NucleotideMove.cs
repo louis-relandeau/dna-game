@@ -4,17 +4,18 @@ using UnityEngine;
 
 public class NucleotideMoveScript : MonoBehaviour, IRelativeTime
 {
-    [System.NonSerialized]
-    public float frequency = 1.05f,
-                 amplitude = 1.35f,
-                 phaseShift = 2f; // Appears as x offset
+    [System.NonSerialized]    
+    public float frequency = 1.25f,
+                 amplitude = 1f,
+                 phaseShift = 210 * Mathf.PI / 180,
+                 xOffset = 0f;
 
     public float relativeTime { get; set; } = 1f;
 
     public float xPos;
 
-    public void SetStartPos(float currTime) {
-        xPos = Mathf.Sin(currTime * frequency + phaseShift) * amplitude;
+    public void SetStartPosX(float currTime) {
+        xPos = Mathf.Sin(currTime * frequency + phaseShift) * amplitude + xOffset;
     }
 
     void Update()

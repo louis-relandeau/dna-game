@@ -103,7 +103,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fafab217b97d524489bf0276a968eba4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  xPos: 1.160795
+  frequency: 1.35
+  amplitude: 1.2
+  phaseShift: 1.2
+  xPos: -1.1191373
 --- !u!222 &7985611397518028411
 CanvasRenderer:
   m_ObjectHideFlags: 0
