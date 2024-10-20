@@ -141,7 +141,7 @@ public class SpawnerScript : MonoBehaviour
     }
 
     void SpawnDnaStrand(float optionalStartY = 10) {
-        GameObject instance = Instantiate(dnaStrand, new Vector3(0, optionalStartY, 0), transform.rotation);
+        GameObject instance = Instantiate(dnaStrand, new Vector3(0, optionalStartY, 0.1f), transform.rotation);
         UpdateGameObjectRelativeTime<MotionDNA>(instance);
         dnaStrands.Add(instance);
     }
