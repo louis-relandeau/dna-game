@@ -11,12 +11,11 @@ public class MainMenuScript : MonoBehaviour
 
     private Dictionary<int, string> scoreComments = new Dictionary<int, string>
     {
-        { 20, "yh u can't do worse" },
-        { 50, "not really trying are u" },
-        { 100, "okay i guess better" },
-        { 150, "even better" },
-        { 200, "damn" },
-        { int.MaxValue, "ninja" }
+        { 20, "Baby steps :)" },
+        { 50, "You can do better :p" },
+        { 100, "Okay not too shaby ;)" },
+        { 150, "Getting serious :D" },
+        { int.MaxValue, "Ninja :o" }
     };
 
     void Start() {

@@ -71,6 +71,13 @@ public class SpawnerScript : MonoBehaviour
                         if (key != expectedKey && Input.GetKeyDown(key.ToString().ToLower())) {
                             MusicManager.Instance.PlaySFX(1, 0.2f);
                             UpdateRelativeTime(currRelativeTime += 0.2f);
+
+                            // Trigger a change in animation of the oldestNucleotide
+                            // Get from animator component
+                            Animator animator = oldestNucleotide.GetComponentInChildren<Animator>();
+                            if (animator != null) {
+                                animator.SetTrigger("Error");
+                            }
                             break;
                         }
                     }
@@ -109,7 +116,6 @@ public class SpawnerScript : MonoBehaviour
         T moveScript = gameObject.GetComponent<T>();
         if (moveScript != null) {
             moveScript.relativeTime = currRelativeTime;
-            Debug.Log("updated relative time smth");
         }
     }
 
@@ -123,21 +129,53 @@ public class SpawnerScript : MonoBehaviour
         foreach (GameObject dnaStrand in dnaStrands) {
             UpdateGameObjectRelativeTime<MotionDNA>(dnaStrand);
         }
-        Debug.Log("Relative time: " + currRelativeTime);
 
         // Also increase music speed. Not nice to change pitch
         // MusicManager.Instance.SetMusicSpeed(currRelativeTime);
     }
 
     void KillNucleotide(GameObject nucleotide) {
-        GameObject particleEffect = Instantiate(nucleotideDestroyParticles,
-                                                nucleotide.transform.position,
-                                                nucleotide.transform.rotation);
+        // Find the TextMeshPro component and disable it
+        TextMeshPro textComponent = nucleotide.GetComponentInChildren<TextMeshPro>();
+        if (textComponent != null) {
+            textComponent.enabled = false;
+        }
+
+        // Set its speed to 0
+        NucleotideMoveScript moveScript = nucleotide.GetComponent<NucleotideMoveScript>();
+        if (moveScript != null) {
+            moveScript.relativeTime = 0;
+        }
 
         nucleotides.RemoveAt(0);
-        Destroy(nucleotide);
+
+        // Start a coroutine to wait for the death animation to finish
+        Animator animator = nucleotide.GetComponentInChildren<Animator>();
+        if (animator != null) {
+            animator.SetTrigger("Death");
+            StartCoroutine(WaitForDeathAnimation(animator, nucleotide));
+        }
+        
         MusicManager.Instance.PlaySFX(0, 0.2f);
         counter += 1;
+    }
+
+    IEnumerator WaitForDeathAnimation(Animator animator, GameObject nucleotide) {
+        AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+
+        // Wait to enter the death animation
+        while (!stateInfo.IsName("bubble-death")) {
+            yield return null;
+            stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+        }
+
+        // Wait for the animation to finish
+        while (stateInfo.normalizedTime <= 1) {
+            yield return null;
+            stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+        }
+        
+        Destroy(nucleotide);
     }
 
     void SpawnDnaStrand(float optionalStartY = 10) {
