@@ -7,7 +7,6 @@ using UnityEngine.SceneManagement;
 public class SpawnerScript : MonoBehaviour
 {
     public GameObject nucleotide;
-    public GameObject nucleotideDestroyParticles;
     public GameObject dnaStrand;
 
     [System.NonSerialized]
